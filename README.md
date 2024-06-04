@@ -1,4 +1,4 @@
-This project creates an applicatiob that uses RAG for document contextualization. It uses the following tools:
+This project creates an application that uses RAG for document contextualization. It uses the following tools:
 
 - Langchain
 - FAISS
