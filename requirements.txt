@@ -5,3 +5,6 @@ streamlit
 faiss-cpu
 pypdf
 langchain_community
+pandas
+matplotlib
+langchain-experimental

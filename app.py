@@ -16,7 +16,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 
 # Vector Embedding And Vector Store
-
+# from langchain_community.vectorstores import FAISS
 from langchain.vectorstores import FAISS
 
 ## LLm Models
@@ -30,7 +30,7 @@ bedrock_embeddings=BedrockEmbeddings(model_id="amazon.titan-embed-text-v1",clien
 
 ## Data ingestion
 def data_ingestion():
-    loader=PyPDFDirectoryLoader("pdf")
+    loader=PyPDFDirectoryLoader("reports")
     documents=loader.load()
 
     # - in our testing Character split works better with this PDF data set
@@ -47,7 +47,7 @@ def get_vector_store(docs):
         docs,
         bedrock_embeddings
     )
-    vectorstore_faiss.save_local("faiss_index")
+    vectorstore_faiss.save_local("faiss_index_reports")
 
 def get_claude_llm():
     ##create the Anthropic Model
@@ -113,7 +113,7 @@ def main():
 
     if st.button("Claude Output"):
         with st.spinner("Processing..."):
-            faiss_index = FAISS.load_local("faiss_index", bedrock_embeddings, allow_dangerous_deserialization=True)
+            faiss_index = FAISS.load_local("faiss_index_reports", bedrock_embeddings, allow_dangerous_deserialization=True)
             llm=get_claude_llm()
             
             #faiss_index = get_vector_store(docs)
@@ -122,10 +122,9 @@ def main():
 
     if st.button("Llama2 Output"):
         with st.spinner("Processing..."):
-            faiss_index = FAISS.load_local("faiss_index", bedrock_embeddings, allow_dangerous_deserialization=True)
+            faiss_index = FAISS.load_local("faiss_index_reports", bedrock_embeddings, allow_dangerous_deserialization=True)
             llm=get_llama2_llm()
             
-            #faiss_index = get_vector_store(docs)
             st.write(get_response_llm(llm,faiss_index,user_question))
             st.success("Done")
 
