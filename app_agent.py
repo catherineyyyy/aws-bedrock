@@ -36,12 +36,14 @@ st_callback = StreamlitCallbackHandler(st.container())
 
 ## Bedrock Clients
 bedrock = boto3.client(service_name="bedrock-runtime")
-bedrock_embeddings=BedrockEmbeddings(model_id="amazon.titan-embed-text-v1",client=bedrock)
+bedrock_embeddings = BedrockEmbeddings(
+    model_id="amazon.titan-embed-image-v1", client=bedrock
+)
 
 
 ## Data ingestion
 def loader():
-    loader = PyPDFDirectoryLoader("reports")
+    loader = PyPDFDirectoryLoader("pdfs")
     documents = loader.load()
     docs = [doc for doc in documents if doc.page_content.strip()]
     return docs
@@ -58,7 +60,7 @@ def data_ingestion(documents):
 ## Vector Embedding and vector store
 def get_vector_store(docs):
     vectorstore_faiss = FAISS.from_documents(docs, bedrock_embeddings)
-    vectorstore_faiss.save_local("faiss_index_reports")
+    vectorstore_faiss.save_local("faiss_index_pdfs")
 
 
 def get_claude_llm():
@@ -69,7 +71,7 @@ def get_claude_llm():
     return llm
 
 def get_llama2_llm():
-    ##create the Anthropic Model
+    ##create the Llama Model
     llm=Bedrock(model_id="meta.llama2-70b-chat-v1",client=bedrock,
                 model_kwargs={'max_gen_len':200})
     
@@ -142,8 +144,11 @@ def get_response_llm(llm, vectorstore_faiss, query):
 
 
 def configure_retriever():
+    bedrock_embeddings = BedrockEmbeddings(
+        model_id="amazon.titan-embed-image-v1", client=bedrock
+    )
     vectorstore = FAISS.load_local(
-        "faiss_index_reports", bedrock_embeddings, allow_dangerous_deserialization=True
+        "faiss_index_pdfs", bedrock_embeddings, allow_dangerous_deserialization=True
     )
     return vectorstore
 
@@ -160,10 +165,11 @@ def search_docs(query):
     """Searches the document store for relevant information."""
     vectorstore = configure_retriever()
     print(f"query: {query}")
-    if query["value"]:
-        results = vectorstore.similarity_search(query["value"])
-    else:
-        results = vectorstore.similarity_search(query["query"])
+    # if query["value"]:
+    #     results = vectorstore.similarity_search(query["value"])
+    # else:
+    #     results = vectorstore.similarity_search(query["query"])
+    results = vectorstore.similarity_search(query)
     return {"docs": results}
 
 
