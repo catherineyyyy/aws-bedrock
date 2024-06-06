@@ -8,6 +8,7 @@ import streamlit as st
 
 from langchain_community.embeddings import BedrockEmbeddings
 from langchain.llms.bedrock import Bedrock
+from langchain_community.chat_models.bedrock import BedrockChat
 
 ## Data Ingestion
 
@@ -51,8 +52,8 @@ def get_vector_store(docs):
 
 def get_claude_llm():
     ##create the Anthropic Model
-    llm=Bedrock(model_id="ai21.j2-mid-v1",client=bedrock,
-                model_kwargs={'maxTokens':200})
+    llm=BedrockChat(model_id="anthropic.claude-3-sonnet-20240229-v1:0",client=bedrock,
+                model_kwargs={'max_tokens':200})
     
     return llm
 

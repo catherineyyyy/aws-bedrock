@@ -63,13 +63,6 @@ def get_vector_store(docs):
     vectorstore_faiss.save_local("faiss_index_pdfs")
 
 
-def get_claude_llm():
-    ##create the Anthropic Model
-    llm=Bedrock(model_id="anthropic.claude-v2",client=bedrock,
-                model_kwargs={'max_tokens_to_sample':200})
-    
-    return llm
-
 def get_llama2_llm():
     ##create the Llama Model
     llm=Bedrock(model_id="meta.llama2-70b-chat-v1",client=bedrock,
@@ -77,6 +70,23 @@ def get_llama2_llm():
     
     return llm
 
+
+def get_mistral_llm():
+    ##create the Mistral Model
+    llm = Bedrock(
+        model_id="mistral.mistral-7b-instruct-v0:2",
+        client=bedrock,
+    )
+    llm.model_kwargs = {
+        "temperature": 0.3,
+        "max_tokens": 1000,
+    }
+    return llm
+
+def get_claude_llm():
+    ##create the Anthropic Model
+    llm=BedrockChat(model_id="anthropic.claude-3-sonnet-20240229-v1:0",client=bedrock,
+                model_kwargs={'max_tokens':200})
 
 def get_llm_transformer(llm):
     transformer = LLMGraphTransformer(llm=llm)
@@ -165,11 +175,11 @@ def search_docs(query):
     """Searches the document store for relevant information."""
     vectorstore = configure_retriever()
     print(f"query: {query}")
-    # if query["value"]:
-    #     results = vectorstore.similarity_search(query["value"])
-    # else:
-    #     results = vectorstore.similarity_search(query["query"])
-    results = vectorstore.similarity_search(query)
+    if query["value"]:
+        results = vectorstore.similarity_search(query["value"])
+    else:
+        results = vectorstore.similarity_search(query["query"])
+    # results = vectorstore.similarity_search(query)
     return {"docs": results}
 
 
@@ -182,7 +192,9 @@ retriever_tool = Tool(
 # print("init tools")
 tools = [retriever_tool]
 print("init openai functions")
-llm = get_llama2_llm()
+# llm = get_llama2_llm()
+llm = get_mistral_llm()
+# llm = get_claude_llm()
 agent = initialize_agent(
     tools,
     llm,
