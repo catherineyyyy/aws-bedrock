@@ -4,7 +4,7 @@ import sys
 import boto3
 import streamlit as st
 
-## We will be suing Titan Embeddings Model To generate Embedding
+## We will be using Titan Embeddings Model To generate Embedding
 
 from langchain_community.embeddings import BedrockEmbeddings
 from langchain.llms.bedrock import Bedrock
@@ -61,7 +61,7 @@ def get_vector_store(docs, inp):
 def get_claude_llm():
     ##create the Anthropic Model
     llm=BedrockChat(model_id="anthropic.claude-3-sonnet-20240229-v1:0",client=bedrock,
-                model_kwargs={'max_tokens':1000})
+                model_kwargs={'max_tokens':500})
     
     return llm
 
@@ -87,6 +87,9 @@ Question: {question}
 
 Assistant:"""
 
+# Completeness check
+# General Compliance
+# Key Things
 
 prompt_template_compliance = """
 Imagine you are a compliance officer for a bank checking if policies and guidelines are being met.
@@ -101,8 +104,15 @@ The following are the poilicies to be checked against:
 </context
 
 Provide the reason for non compliance with the corresponding section of the document 
-and suggest edits to be made. Be as granular as possible.
-
+and suggest edits to be made. Be as granular as possible. Provide just the summary of the non-compliant sections 
+and a high level yes, no or partially compliant
+in form of table with the section in one column, yes or no in the other column and the high level reason of non 
+compliance or partial compliance in less than 10 words. 
+Add the detailed summary under the table with the non compliant or partially compliant sections with quoted reference and 
+suggested change. 
+Please refer only to the document. 
+Please be formal in your response. 
+Please avoid any biases.
 Assistant:"""
 
 PROMPT1 = PromptTemplate(
@@ -133,8 +143,7 @@ def main():
     uploaded_file = st.file_uploader('Choose your .pdf file', type="pdf")
     tab1, tab2, tab3 = st.tabs(["Compi-Ease", "Compliance-Bot", "Regu-sinc"])
     with tab1:
-        # user_question = st.text_input("Ask a Question from the PDF Files")
-        
+        # user_question = st.text_input("Ask a Question from the PDF Files")        
         if uploaded_file is not None:
             user_question = extract_pdf(uploaded_file)
 
@@ -147,7 +156,15 @@ def main():
                     get_vector_store(docs, 'guidelines')
                     st.success("Done")
 
-        if st.button("Claude Output"):
+        if st.button("EBA"):
+            with st.spinner("Processing..."):
+                faiss_index = FAISS.load_local("faiss_index_guidelines", bedrock_embeddings, allow_dangerous_deserialization=True)
+                llm=get_claude_llm()
+                
+                st.write(get_response_llm(llm,faiss_index,user_question, PROMPT1))
+                st.success("Done")
+
+        if st.button("FINRA"):
             with st.spinner("Processing..."):
                 faiss_index = FAISS.load_local("faiss_index_guidelines", bedrock_embeddings, allow_dangerous_deserialization=True)
                 llm=get_claude_llm()
