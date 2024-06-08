@@ -26,8 +26,6 @@ from langchain.vectorstores import FAISS
 ## LLm Models
 from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
-from langchain.schema import Document
-from langchain_community.document_loaders import PyPDFLoader
 from pypdf import PdfReader
 
 ## Bedrock Clients
@@ -36,19 +34,12 @@ bedrock_embeddings=BedrockEmbeddings(model_id="amazon.titan-embed-text-v1",clien
 
 
 #Extract PDF Data
-def load_pdf_as_chunk(pdf_path):
-    # Open the PDF file\
-    loader = PyPDFLoader(pdf_path)
-    pages = loader.load_and_split()
-    all_text = ""
-    
-    # Iterate through the pages and extract text
-    for page in pages:
-        all_text += page.page_content
-    
-    # Create a Document object with the entire text
-    # doc = Document(page_content=all_text)
-    
+def extract_pdf(filename):
+    reader = PdfReader(filename)
+    all_text = " "
+    for i in range(0,len(reader.pages)):
+        page = reader.pages[i]
+        all_text = all_text + page.extract_text()
     return all_text
 
 ## Data ingestion
@@ -159,7 +150,7 @@ def main():
     with tab1:
         # user_question = st.text_input("Ask a Question from the PDF Files")        
         if uploaded_file is not None:
-            user_question = load_pdf_as_chunk(uploaded_file)
+            user_question = extract_pdf(uploaded_file)
 
         with st.sidebar:
             st.title("Update Or Create Vector Store:")
