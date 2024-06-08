@@ -8,3 +8,4 @@ langchain_community
 pandas
 matplotlib
 langchain-experimental
+python-dotenv

@@ -3,6 +3,9 @@ import os
 import sys
 import boto3
 import streamlit as st
+from dotenv import load_dotenv
+
+load_dotenv()
 
 ## We will be using Titan Embeddings Model To generate Embedding
 
@@ -61,7 +64,7 @@ def get_vector_store(docs, inp):
 def get_claude_llm():
     ##create the Anthropic Model
     llm=BedrockChat(model_id="anthropic.claude-3-sonnet-20240229-v1:0",client=bedrock,
-                model_kwargs={'max_tokens':500})
+                model_kwargs={'max_tokens':1000})
     
     return llm
 
@@ -103,13 +106,13 @@ The following are the poilicies to be checked against:
 {context}
 </context
 
-Provide the reason for non compliance with the corresponding section of the document 
-and suggest edits to be made. Be as granular as possible. Provide just the summary of the non-compliant sections 
+Provide the summary of the non-compliant sections 
 and a high level yes, no or partially compliant
-in form of table with the section in one column, yes or no in the other column and the high level reason of non 
-compliance or partial compliance in less than 10 words. 
-Add the detailed summary under the table with the non compliant or partially compliant sections with quoted reference and 
-suggested change. 
+in tabular form with the summary of the non-compliant section in one column, 
+yes or no in the other column and 
+the high level reason of non compliance or partial compliance in less than 5 words. 
+Also provide the detailed summary under the table with the non compliant or partially compliant 
+sections with quoted reference and suggested change. 
 Please refer only to the document. 
 Please be formal in your response. 
 Please avoid any biases.
