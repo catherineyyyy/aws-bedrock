@@ -27,14 +27,22 @@ from langchain.vectorstores import FAISS
 from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 from pypdf import PdfReader
+from langchain.schema import Document
 
 ## Bedrock Clients
 bedrock=boto3.client(service_name="bedrock-runtime")
 bedrock_embeddings=BedrockEmbeddings(model_id="amazon.titan-embed-text-v1",client=bedrock)
 
 
-#Extract PDF Data
+
 def extract_pdf(filename):
+    '''
+    Extract all text of the PDF Data into one string
+    args : 
+        filname - name of the .pdf file
+    returns:
+        all_text - string output of all the text
+    '''
     reader = PdfReader(filename)
     all_text = " "
     for i in range(0,len(reader.pages)):
@@ -42,9 +50,32 @@ def extract_pdf(filename):
         all_text = all_text + page.extract_text()
     return all_text
 
+
+def extract_pdf_docs(filename):
+    '''
+    Extract PDF Data as Docs per page
+    args : 
+        filname - name of the .pdf file
+    returns:
+        docs - Document output per page of the pdf file
+    '''
+    reader = PdfReader(filename)
+    docs = []
+    for i in range(0,len(reader.pages)):
+        page = reader.pages[i]
+        docs.append(Document(page_content=page.extract_text()))
+    return docs
+
 ## Data ingestion
-def data_ingestion(inp):
-    loader=PyPDFDirectoryLoader(inp)
+def data_ingestion(dir):
+    '''
+    Extract PDF files from a directory and returns chunked docs
+    args : 
+        filname - name of the .pdf file
+    returns:
+        docs - Document output per chunk of the pdf files
+    '''
+    loader=PyPDFDirectoryLoader(dir)
     documents=loader.load()
 
     # - in our testing Character split works better with this PDF data set
@@ -55,8 +86,14 @@ def data_ingestion(inp):
     return docs
 
 ## Vector Embedding and vector store
-
 def get_vector_store(docs, inp):
+    '''
+    Extract PDF files from a directory and returns chunked docs
+    args : 
+        docs - Document input of the pdf file or files
+        inp - directory location based on guideline
+    returns:
+    '''
     vectorstore_faiss=FAISS.from_documents(
         docs,
         bedrock_embeddings
