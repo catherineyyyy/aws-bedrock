@@ -157,12 +157,32 @@ Please be formal in your response.
 Please avoid any biases.
 Assistant:"""
 
+prompt_template_compliance_upd = """
+Imagine you are a compliance officer for a bank checking if policies and guidelines are being met.
+Check the sections of the following question on whether the policies and guidelines are being met.
+<question>
+{question}
+</question
+
+The following are the policies and guidelines to be checked against:
+<context>
+{context}
+</context
+
+Provide a high level response of the question with a single word - Yes, No or Partially Compliant for each section of the question.
+Provide a detailed summary under the high level response for the non compliant or partially compliant 
+sections of the context with quoted reference from the context above and suggested change. 
+Please refer only to the document. 
+Please be formal in your response. 
+Please avoid any biases.
+Assistant:"""
+
 PROMPT1 = PromptTemplate(
     template=prompt_template_compliance, input_variables=["context", "question"]
 )
 
 PROMPT2 = PromptTemplate(
-    template=prompt_template_chat, input_variables=["context", "question"]
+    template=prompt_template_compliance_upd, input_variables=["context", "question"]
 )
 
 def get_response_llm(llm,vectorstore_faiss,query, PROMPT):
@@ -203,7 +223,7 @@ def main():
                 faiss_index = FAISS.load_local("faiss_index_guidelines", bedrock_embeddings, allow_dangerous_deserialization=True)
                 llm=get_claude_llm()
                 
-                st.write(get_response_llm(llm,faiss_index,user_question, PROMPT1))
+                st.write(get_response_llm(llm,faiss_index,user_question, PROMPT2))
                 st.success("Done")
 
         if st.button("FINRA"):
@@ -211,7 +231,7 @@ def main():
                 faiss_index = FAISS.load_local("faiss_index_guidelines", bedrock_embeddings, allow_dangerous_deserialization=True)
                 llm=get_claude_llm()
                 
-                st.write(get_response_llm(llm,faiss_index,user_question, PROMPT1))
+                st.write(get_response_llm(llm,faiss_index,user_question, PROMPT2))
                 st.success("Done")
 
     with tab2:
@@ -220,7 +240,6 @@ def main():
 
     with tab3:
         st.header("Regu-sinc")
-        st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
 
     
 
