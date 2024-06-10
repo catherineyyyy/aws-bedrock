@@ -164,13 +164,19 @@ Check the sections of the following question on whether the policies and guideli
 {question}
 </question
 
+These are the sections of the above document to be checked with the below policies and guidelines.
+<sections>
+{section}
+</sections
+
 The following are the policies and guidelines to be checked against:
 <context>
 {context}
 </context
 
-Provide a high level response of the question with a single word - Yes, No or Partially Compliant for each section of the question.
-Provide a detailed summary under the high level response for the non compliant or partially compliant 
+Provide a high level response table of the question with a single word - Yes, No or Partially Compliant for each section of the question as a table.
+The first column of the table is the section, second column is the check for compliance with a Yes, No or Partially Compliant.
+Provide a detailed summary under the high level response table for the non compliant or partially compliant 
 sections of the context with quoted reference from the context above and suggested change. 
 Please refer only to the document. 
 Please be formal in your response. 
@@ -181,8 +187,21 @@ PROMPT1 = PromptTemplate(
     template=prompt_template_compliance, input_variables=["context", "question"]
 )
 
+
+sections_txt = '''
+1. Introduction
+2. Scope
+3. Governance and Strategy
+4. Risk Management Framework
+5. Information Security
+6. ICT Operations Management
+7. Business Continuity Management
+8. Compliance and Reporting
+9. Training and Awareness
+'''
+
 PROMPT2 = PromptTemplate(
-    template=prompt_template_compliance_upd, input_variables=["context", "question"]
+    template=prompt_template_compliance_upd.replace('{section}',sections_txt), input_variables=["context", "question"]
 )
 
 def get_response_llm(llm,vectorstore_faiss,query, PROMPT):
@@ -190,7 +209,7 @@ def get_response_llm(llm,vectorstore_faiss,query, PROMPT):
     llm=llm,
     chain_type="stuff",
     retriever=vectorstore_faiss.as_retriever(
-        search_type="similarity", search_kwargs={"k": 3}
+        search_type="similarity", search_kwargs={"k": 10}
     ),
     return_source_documents=True,
     chain_type_kwargs={"prompt": PROMPT}
